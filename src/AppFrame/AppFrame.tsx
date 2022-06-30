@@ -1,39 +1,86 @@
-import { MouseEvent } from 'react';
-import { Container, AppBar, Toolbar, Button, Box, Typography, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import PersonIcon from '@mui/icons-material/Person';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import GroupIcon from '@mui/icons-material/Group';
+import {useState, useEffect, MouseEvent}  from 'react';
+import Box from '@mui/material/Box';
+import Drawer from '@mui/material/Drawer';
+import AppBar from '@mui/material/AppBar';
+import CssBaseline from '@mui/material/CssBaseline';
+import Toolbar from '@mui/material/Toolbar';
+import List from '@mui/material/List';
+import Typography from '@mui/material/Typography';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import './AppFrame.css';
+import AssignmentIcon from '@mui/icons-material/Assignment'
+import PersonIcon from '@mui/icons-material/Person';
+import GroupIcon from '@mui/icons-material/Group';
+import {Dashboard} from '../Dashboard/Dashboard';
 
-const panelWidth = 200;
+import {
+    BrowserRouter,
+    Routes,
+    Route,
+    Link
+  } from "react-router-dom";
 
-export const AppFrame = ({token} : {token: string}) => {
-    
+const drawerWidth = 240;
+const tokenName = 'vdas_token';
+
+export const AppFrame = () => {
+
+    const [ token, setToken ] = useState<string|null>();
+    const [ isOpened, setIsOpened ] = useState<boolean>(false);
+    const [ isLoggedIn, setIsLoggedIn ] = useState<boolean>(false);
+
+    // init of component, check for token & set logged in
+    useEffect(() => {
+        console.log('inside appFrame init useEffect');
+        if (!token && localStorage.getItem(tokenName)) {
+            setToken(localStorage.getItem(tokenName));
+        }
+
+        // if we have a token, set our authenticated state to true
+        if (token) {
+            console.log('setting isLoggedIn from token value');
+            setIsLoggedIn(true);
+        }
+    }, []);
+
+    // handler for logging out
     const handleLogout = (e: MouseEvent<HTMLElement>) : void => {
         e.preventDefault();
-        localStorage.removeItem('vdas_token');
+        localStorage.removeItem(tokenName);
+        setIsLoggedIn(false);
+    }
+
+    const handleLogin = (e: MouseEvent<HTMLElement>) : void => {
+        e.preventDefault();
     }
 
     return (
-        <Container>
-        <AppBar
-            position="fixed"
-            sx={{ padding: '20px', marginLeft: {panelWidth}, zIndex: '1201'}}
-        >
-            <Toolbar disableGutters={true}>
-                <Box 
-                    component="img"
-                    sx={{ maxWidth: '120px'}}
-                    src='/logo.png' />
-                <Typography variant="h6" component="div" sx={{ flexGrow: 1, marginLeft: '50px'}}>
-                    CHLA VDAS
-                </Typography>
-                <Button variant="outlined" sx={{ color: 'white' }} onClick={handleLogout}>Logout</Button>
-            </Toolbar>
-        </AppBar>
-        <Drawer variant="permanent" open={true}>
-            <List sx={{marginTop: '115px'}}>
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <Toolbar>
+            <Box 
+            component="img"
+            sx={{ maxWidth: '120px'}}
+            src='/logo.png' />
+          <Typography variant="h6" noWrap component="div" sx={{ marginLeft: '20px' }}>
+            CHLA VDAS
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+        }}
+      >
+        <Toolbar />
+        <Box sx={{ overflow: 'auto' }}>
+            <List>
                 <ListItem button key='dashboard'>
                 <ListItemIcon>
                         <DashboardIcon />
@@ -62,7 +109,18 @@ export const AppFrame = ({token} : {token: string}) => {
                     <ListItemText primary='Users'/>
                 </ListItem>
             </List>
-        </Drawer>
-        </Container>
-    )
+        </Box>
+      </Drawer>
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Toolbar />
+        
+        <BrowserRouter>
+        <Routes>
+            <Route path="/" element={<Dashboard />} />
+            </Routes>
+        </BrowserRouter>
+
+      </Box>
+    </Box>  
+    );
 }

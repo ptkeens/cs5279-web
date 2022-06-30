@@ -42,11 +42,16 @@ export class UserService {
     }
 
     checkLogin = (token: string|undefined) => {
+        if (token) {
+
+        }
 
     }
 
-    logout = () => {
-        localStorage.removeItem('vdas_token');
+    logout = (token: string|undefined) => {
+        if (token) {
+            
+        }
     }
 
 }
