@@ -1,19 +1,37 @@
 import { useState, ChangeEvent } from 'react';
-import { UserService } from '../User/UserService';
-import { Grid, Box, Button, Alert, TextField, Typography } from '@mui/material';
+import { useAuth } from '../Auth/Auth';
+import { Grid, Box, Button, Alert, TextField } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
-export default function Login({setToken}: {setToken: (value: string) => void}) {
+export const Login = () => {
     const [ email, setEmail ] = useState<string>();
     const [ password, setPassword ] = useState<string>();
     const [ error, setError ] = useState<string>();
+    const auth = useAuth();
 
-    const userService = new UserService();
+    console.log('auth context in login', auth);
 
-    const handleSubmit = async (e: ChangeEvent<HTMLFormElement>) => {
+    window.document.title = 'VDAS - Login';
+
+    let navigate = useNavigate();
+
+    const handleSubmit = async (e: ChangeEvent<HTMLFormElement>) : Promise<void> => {
         e.preventDefault();
+        setError('');
         try {
-            const result = await userService.login(email, password);
-            setToken(result);
+
+            if (!email || email.length === 0 || typeof email !== 'string') {
+                setError("You must supply a valid e-mail address!");
+                return;
+            }
+
+            if (!password || password.length === 0 || typeof password !== 'string') {
+                setError("You must supply a valid password");
+                return;
+            }
+
+            await auth.login(email, password);
+            navigate('/', { replace: true });
         } catch (err) {
             console.log(err);
             setError('There was an error when trying to login!');
@@ -28,15 +46,14 @@ export default function Login({setToken}: {setToken: (value: string) => void}) {
         alignItems="center"
         minHeight="90vh"
       >
-        <Grid item xs={4} md={4} sx={{ background: '#fff', padding: '10px', minWidth: '300px' }}>
+        <Grid item xs={4} md={4} sx={{ background: '#fff', padding: '10px', minWidth: '350px', border: '1px dashed #ccc' }}>
             <Box sx={{ backgroundColor: '#005A92'}} display="flex" justifyContent="center">
-                <img src="/logo.png" style={{marginLeft: 'auto', marginRight: 'auto'}} />
+                <img alt="CHLA Logo" src="/logo.png" style={{marginLeft: 'auto', marginRight: 'auto'}} />
             </Box>
             {error && 
                     <Alert severity="error">{error}</Alert>
             }
-            <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit} sx={{ p: '5px', m: '5px' }}>
-                <Typography variant='h6' align='center'>VDAS Login</Typography>
+            <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit} sx={{ p: '10px', m: '10px'}}>
                 <TextField 
                     id="email" 
                     variant="outlined" 
