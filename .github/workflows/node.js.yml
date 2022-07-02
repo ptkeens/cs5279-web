@@ -5,10 +5,10 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "staging", "development" ]
   pull_request:
-    branches: [ "master" ]
-
+    branches: [ "master", "staging", "development" ]
+    
 jobs:
   frontend_ci:
     name: Node JS CI
