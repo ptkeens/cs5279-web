@@ -10,7 +10,7 @@ export interface authInterface {
     isAuthenticated: () => boolean,
     getToken: () => string|undefined,
     getTokenFromStorage: () => string,
-    checkToken: (tkn: string|undefined) => Promise<void>,
+    checkToken: (tkn: string|undefined) => Promise<string|boolean>,
     login: (email: string, password: string) => Promise<string>,
     logout: () => void
 }
@@ -57,14 +57,47 @@ export const useProvideAuth = () => {
     // setup a hook to keep the localStorage version of our token current
     useEffect(() => {
         let storedValue = localStorage.getItem(tokenName);
-        console.log('useEffect being called for token change');
         if (token) {
             localStorage.setItem(tokenName, token);
         } else if (storedValue) {
             setToken(storedValue);
-            setIsLoggedIn(true);
+        }
+
+        if (token) {
+            const res = checkToken(token)
+                .then((tkn) => {
+                    setIsLoggedIn(true);
+                })
+                .catch((err) => {
+                    localStorage.removeItem(tokenName);
+                    setIsLoggedIn(false);
+                    setToken('');
+                });
+            
         }
     }, [token]);
+
+    // check login if token is present
+    const checkToken = async (token: string) => {
+        const url = process.env.REACT_APP_BACKEND_HOST + '/auth/checkLogin';
+        const data = new URLSearchParams();
+        data.append('token', token);
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: data
+        });
+
+        if (response.status === 200) {
+            const responseData = await response.json();
+            return responseData.data.token;
+        } else {
+            throw new Error('Invalid/Expired Token');
+        }
+    }
 
     return {
         token,
@@ -81,10 +114,7 @@ export const useProvideAuth = () => {
             return localStorage.getItem(tokenName);
         },
 
-        checkToken : async (tkn : string|undefined) : Promise<void> => {
-
-        },
-
+        checkToken,
         login: async (email: string, password: string) : Promise<string> => {
             const url = process.env.REACT_APP_BACKEND_HOST + '/auth/login';
             const data = new URLSearchParams();
@@ -101,7 +131,7 @@ export const useProvideAuth = () => {
                 });
                 
                 if (response.status === 200) {
-                    let responseData = await response.json();
+                    const responseData = await response.json();
                     setIsLoggedIn(true);
                     setToken(responseData.data.token);
                     return responseData.data.token;
