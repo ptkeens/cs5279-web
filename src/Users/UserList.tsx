@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Grid, Box, Typography, Button } from '@mui/material';
+import { Grid, Box, Typography, Button, Alert } from '@mui/material';
 import { DataGrid , GridColDef } from '@mui/x-data-grid';
 import { UserService } from './UserService';
 import { useAuth } from '../Auth/Auth';
@@ -10,22 +10,30 @@ export const UserList = () => {
     const [ userCollection, setUserCollection ] = useState<UserDto[]>([]);
     const [ selectedRows, setSelectedRows ] = useState<number[]>([]);
     const [ showForm, setShowForm ] = useState<boolean>(false);
-    const [ alert, setAlert ] = useState<string>();
+    const [ alert, setAlert ] = useState<string>('');
+    const [ success, setSuccess ] = useState<string>('');
+    const [ editUser, setEditUser ] = useState<UserDto|null>(null);
 
     const auth = useAuth();
     window.document.title = 'VDAS - Users';
 
+    const svcObj = new UserService(auth.getToken());
+    const getUsers = async () => {
+        const data = await svcObj.listUsers();
+        setUserCollection(data);
+    }
+
     // get our list of users on load
     useEffect(() => {
-        const svcObj = new UserService(auth.getToken());
-        const getUsers = async () => {
-            const data = await svcObj.listUsers();
-            setUserCollection(data);
-        }
-
         getUsers()
             .catch(console.error);
     }, []);
+
+    useEffect(() => {
+        getUsers()
+            .catch(console.error);
+        setEditUser(null);
+    }, [alert, success])
 
     const handleDelete = async () => {
         const svcObj = new UserService(auth.getToken());
@@ -34,13 +42,26 @@ export const UserList = () => {
                 await svcObj.deleteUser(id);
             }
         }
+
+        setSuccess('Record Deleted!');
     }
 
     const handleEdit = async () => {
+        const id = selectedRows[0];
+        const row = userCollection.filter((row) => {
+            if (row.id === id) {
+                return true;
+            }
+        });
 
+        if (row.length === 1) {
+            setEditUser(row[0]);
+            setShowForm(true);
+        }
     }
 
     const handleAdd = () => {
+        setEditUser(null);
         setShowForm(true);
     }
 
@@ -53,6 +74,12 @@ export const UserList = () => {
 
     return (
         <>
+            {alert &&
+                <Alert severity="error">{alert}</Alert>
+            }
+            {success && 
+                <Alert severity="success">{success}</Alert>
+            }
             <Typography variant='h6'>Users</Typography>
 
             <Box sx={{ height: 500, weight: '100%' }}>
@@ -80,7 +107,15 @@ export const UserList = () => {
                     <Button variant="contained" onClick={handleAdd}>Add New User</Button>
                 </Grid>
             </Grid>
-            <UserForm display={showForm} setDisplay={setShowForm}></UserForm>
+            <UserForm 
+                display={showForm} 
+                setDisplay={setShowForm} 
+                alert={alert} 
+                setAlert={setAlert} 
+                success={success} 
+                setSuccess={setSuccess}
+                user={editUser}
+            ></UserForm>
         </>
     )
 }

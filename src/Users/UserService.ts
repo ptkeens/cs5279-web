@@ -1,15 +1,14 @@
-import { UserDto } from "./UserDtos"
-import { useAuth } from "../Auth/Auth";
+import { UserDto, CreateUserDto, UpdateUserDto } from "./UserDtos"
 
 export class UserService {
 
-    token: string;
+    token: string|undefined;
 
     constructor(token?: string) {
         this.token = (token) ?? '';
     }
 
-    setToken = (token: string) => {
+    setToken = (token: string|undefined) => {
         this.token = token;
     }
 
@@ -44,12 +43,45 @@ export class UserService {
         }     
     }
 
-    addUser = async (details: UserDto) => {
+    addUser = async (details: CreateUserDto) => {
+        const url = process.env.REACT_APP_BACKEND_HOST + '/users';
+        const data = new URLSearchParams();
+        
+        for (let [key, value] of Object.entries(details)) {
+            data.append(key, value);
+        }
 
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: data
+            });
+            
+            if (response.status === 200) {
+                return true;
+            } else {
+                switch (response.status) {
+                    case 404:
+                        throw new Error('Resource not found!');
+                    case 401:
+                        throw new Error('Unauthorized');
+                    case 500:
+                        throw new Error('System Error');
+                    default:
+                        throw new Error('Error when contacting API server');
+                }
+            }
+        } catch (err) {
+            throw err;
+        }     
     }
 
-    updateUser = async (id: number, details: UserDto) => {
-
+    updateUser = async (id: number, details: UpdateUserDto) => {
+        // do this!
     }
 
     deleteUser = async (id: number) => {
