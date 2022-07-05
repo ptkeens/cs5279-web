@@ -9,8 +9,6 @@ export const Login = () => {
     const [ error, setError ] = useState<string>();
     const auth = useAuth();
 
-    console.log('auth context in login', auth);
-
     window.document.title = 'VDAS - Login';
 
     let navigate = useNavigate();
