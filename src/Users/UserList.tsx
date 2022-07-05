@@ -27,13 +27,17 @@ export const UserList = () => {
     useEffect(() => {
         getUsers()
             .catch(console.error);
+        
+        // eslint-disable-next-line
     }, []);
 
     useEffect(() => {
         getUsers()
             .catch(console.error);
         setEditUser(null);
-    }, [alert, success])
+
+        // eslint-disable-next-line
+    }, [alert, success]);
 
     const handleDelete = async () => {
         resetMessaging();
