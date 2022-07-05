@@ -64,7 +64,7 @@ export const useProvideAuth = () => {
         }
 
         if (token) {
-            const res = checkToken(token)
+            checkToken(token)
                 .then((tkn) => {
                     setIsLoggedIn(true);
                 })

@@ -113,7 +113,7 @@ export const UserForm = (props: UserFormProps) => {
             firstName: {
                 error: 'You must supply a valid first name',
                 validate: (firstName: string) => {
-                    const regex = /[\w\'\-\.\s]+/;
+                    const regex = /[\w'-.\s]+/;
                     return regex.test(firstName) && firstName.length < 64;
                 },
                 value: firstName
@@ -121,7 +121,7 @@ export const UserForm = (props: UserFormProps) => {
             lastName: {
                 error: 'You must supply a valid last name',
                 validate: (lastName: string) => {
-                    const regex = /[\w\'\-\.\s]+/;
+                    const regex = /[\w'-.\s]+/;
                     return regex.test(lastName) && lastName.length < 64;
                 },
                 value: lastName
@@ -139,7 +139,7 @@ export const UserForm = (props: UserFormProps) => {
         }
 
         for (let param of Object.values(fieldConstraints)) {
-            if (mode == USER_FORM_ADD && !param.validate(param.value)) {
+            if (mode === USER_FORM_ADD && !param.validate(param.value)) {
                 throw new Error(param.error);
             } else {
                 if (param.value && !param.validate(param.value)) {
@@ -150,7 +150,7 @@ export const UserForm = (props: UserFormProps) => {
     }
 
     const handleReset = async () => {
-        if (mode == USER_FORM_ADD) {
+        if (mode === USER_FORM_ADD) {
             resetForm();
         } else {
             if (props.user) {

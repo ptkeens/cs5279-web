@@ -36,6 +36,7 @@ export const UserList = () => {
     }, [alert, success])
 
     const handleDelete = async () => {
+        resetMessaging();
         const svcObj = new UserService(auth.getToken());
         if (selectedRows.length) {
             for (let id of selectedRows) {
@@ -47,11 +48,14 @@ export const UserList = () => {
     }
 
     const handleEdit = async () => {
+        resetMessaging();
         const id = selectedRows[0];
         const row = userCollection.filter((row) => {
             if (row.id === id) {
                 return true;
             }
+
+            return false;
         });
 
         if (row.length === 1) {
@@ -60,7 +64,13 @@ export const UserList = () => {
         }
     }
 
+    const resetMessaging = () => {
+        setAlert('');
+        setSuccess('');
+    }
+
     const handleAdd = () => {
+        resetMessaging();
         setEditUser(null);
         setShowForm(true);
     }
