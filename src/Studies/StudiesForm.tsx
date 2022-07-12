@@ -37,6 +37,8 @@ export const StudiesForm = (props: UserFormProps) => {
     useEffect(() => {
         setOpen(props.display);
         handleReset();
+            
+        // eslint-disable-next-line
     }, [props.display]);
 
     const handleSave = async (e: ChangeEvent<HTMLFormElement>) => {
