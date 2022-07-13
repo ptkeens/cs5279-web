@@ -1,4 +1,4 @@
-import { StudiesDto, CreateStudiesDto, UpdateStudiesDto } from "./StudiesDto";
+import { CreateStudiesDto, UpdateStudiesDto } from "./StudiesDto";
 
 export class StudiesService {
 
