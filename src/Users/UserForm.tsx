@@ -21,11 +21,13 @@ export interface UserFormProps {
     setAlert: Dispatch<SetStateAction<string>>;
     success: string;
     setSuccess: Dispatch<SetStateAction<string>>;
+    setSelectedRows: Dispatch<SetStateAction<any>>;
+    mode: string;
+    setFormMode: Dispatch<SetStateAction<string>>;
 }
 
 export const UserForm = (props: UserFormProps) => {
     const [ open, setOpen ] = useState<boolean>(props.display);
-    const [ mode, setMode ] = useState<string>(USER_FORM_ADD);
     
     const [ email, setEmail ] = useState<string>('');
     const [ firstName, setFirstName ] = useState<string>('');
@@ -38,18 +40,11 @@ export const UserForm = (props: UserFormProps) => {
     // watch for an open request from outside of the component
     useEffect(() => {
         setOpen(props.display);
+        handleReset();
+            
+        // eslint-disable-next-line
     }, [props.display]);
 
-    useEffect(() => {
-        if (props.user) {
-            setMode(USER_FORM_EDIT);
-            setEmail(props.user.email);
-            setFirstName(props.user.firstName);
-            setLastName(props.user.lastName);
-         } else {
-            setMode(USER_FORM_ADD);
-         }
-    }, [props.user]);
 
     const handleSave = async (e: ChangeEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -62,7 +57,7 @@ export const UserForm = (props: UserFormProps) => {
 
             let response = null;
 
-            if (mode === USER_FORM_ADD) {
+            if (props.mode === USER_FORM_ADD) {
                 response = await svcObj.addUser({
                     email,
                     firstName,
@@ -87,7 +82,7 @@ export const UserForm = (props: UserFormProps) => {
 
             if (response) {
                 handleClose();
-                let msg = (mode === USER_FORM_ADD) ? 'New User Added' : 'User Saved';
+                let msg = (props.mode === USER_FORM_ADD) ? 'New User Added' : 'User Saved';
                 props.setSuccess(msg);
             } else {
                 handleClose();
@@ -139,7 +134,7 @@ export const UserForm = (props: UserFormProps) => {
         }
 
         for (let param of Object.values(fieldConstraints)) {
-            if (mode === USER_FORM_ADD && !param.validate(param.value)) {
+            if (props.mode === USER_FORM_ADD && !param.validate(param.value)) {
                 throw new Error(param.error);
             } else {
                 if (param.value && !param.validate(param.value)) {
@@ -150,7 +145,7 @@ export const UserForm = (props: UserFormProps) => {
     }
 
     const handleReset = async () => {
-        if (mode === USER_FORM_ADD) {
+        if (props.mode === USER_FORM_ADD) {
             resetForm();
         } else {
             if (props.user) {
@@ -163,14 +158,15 @@ export const UserForm = (props: UserFormProps) => {
     }
 
     const resetForm = () => {
-        setEmail('');
-        setFirstName('');
-        setLastName('');
+        setEmail(props.mode === USER_FORM_ADD ? '' : props.user.email);
+        setFirstName(props.mode === USER_FORM_ADD ? '' : props.user.firstName);
+        setLastName(props.mode === USER_FORM_ADD ? '' : props.user.lastName);
         setPassword('');
     }
 
     const handleClose = async () => {
         props.setDisplay(false);
+        props.setSelectedRows([]);
         resetForm();
     }
 
@@ -178,7 +174,7 @@ export const UserForm = (props: UserFormProps) => {
          <Dialog open={open} onClose={handleClose}>
             <DialogTitle>User Form</DialogTitle>
             <DialogContent>
-                <DialogContentText>Use this form to {mode === USER_FORM_ADD ? 'add' : 'edit'} a user</DialogContentText>
+                <DialogContentText>Use this form to {props.mode === USER_FORM_ADD ? 'add' : 'edit'} a user</DialogContentText>
                 {error && 
                     <Alert severity="error">{error}</Alert>
                 }
@@ -190,7 +186,7 @@ export const UserForm = (props: UserFormProps) => {
                         onChange={e => setFirstName(e.target.value)}
                         sx={{width: '100%'}}
                         value={firstName}
-                        required={mode === USER_FORM_ADD}
+                        required={props.mode === USER_FORM_ADD}
                     />
                     <TextField
                         id="lastName"
@@ -199,7 +195,7 @@ export const UserForm = (props: UserFormProps) => {
                         onChange={e => setLastName(e.target.value)}
                         sx={{width: '100%', marginTop: '10px'}}
                         value={lastName}
-                        required={mode === USER_FORM_ADD}
+                        required={props.mode === USER_FORM_ADD}
                     />
                     <TextField 
                         id="email" 
@@ -208,7 +204,7 @@ export const UserForm = (props: UserFormProps) => {
                         onChange={e => setEmail(e.target.value)} 
                         sx={{width: '100%', marginTop: '10px'}}
                         value={email}
-                        required={mode === USER_FORM_ADD}
+                        required={props.mode === USER_FORM_ADD}
                     />
                     <TextField
                         id="password" 
@@ -217,7 +213,7 @@ export const UserForm = (props: UserFormProps) => {
                         type="password" 
                         onChange={(e => setPassword(e.target.value))} 
                         sx={{width: '100%', marginTop: '10px'}}
-                        required={mode === USER_FORM_ADD}
+                        required={props.mode === USER_FORM_ADD}
                     />
                     <DialogActions>
                         <Button type="submit" variant="contained" >Save</Button>&nbsp;

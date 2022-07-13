@@ -4,7 +4,7 @@ import { DataGrid , GridColDef } from '@mui/x-data-grid';
 import { UserService } from './UserService';
 import { useAuth } from '../Auth/Auth';
 import { UserDto } from './UserDtos';
-import { UserForm } from './UserForm';
+import { UserForm, USER_FORM_ADD, USER_FORM_EDIT } from './UserForm';
 
 export const UserList = () => {
     const [ userCollection, setUserCollection ] = useState<UserDto[]>([]);
@@ -13,6 +13,7 @@ export const UserList = () => {
     const [ alert, setAlert ] = useState<string>('');
     const [ success, setSuccess ] = useState<string>('');
     const [ editUser, setEditUser ] = useState<UserDto|null>(null);
+    const [ formMode, setFormMode ] = useState<string>('');
 
     const auth = useAuth();
     window.document.title = 'VDAS - Users';
@@ -63,6 +64,7 @@ export const UserList = () => {
         });
 
         if (row.length === 1) {
+            setFormMode(USER_FORM_EDIT);
             setEditUser(row[0]);
             setShowForm(true);
         }
@@ -74,6 +76,7 @@ export const UserList = () => {
     }
 
     const handleAdd = () => {
+        setFormMode(USER_FORM_ADD);
         resetMessaging();
         setEditUser(null);
         setShowForm(true);
@@ -109,6 +112,7 @@ export const UserList = () => {
                             )
                         )
                     }}
+                    selectionModel={selectedRows}
                 />
             <br/>
             </Box>
@@ -129,6 +133,9 @@ export const UserList = () => {
                 success={success} 
                 setSuccess={setSuccess}
                 user={editUser}
+                setSelectedRows={setSelectedRows}
+                mode={formMode}
+                setFormMode={setFormMode}
             ></UserForm>
         </>
     )
